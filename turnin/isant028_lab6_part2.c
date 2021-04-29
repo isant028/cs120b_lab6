@@ -8,7 +8,6 @@
  *	code, is my own original work.
  */
 
-
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #ifdef _SIMULATE_
@@ -50,10 +49,10 @@ void TimerSet(unsigned long M) {
 	_avr_timer_M = M;
 	_avr_timer_cntcurr = _avr_timer_M;
 }
-//dont change above
+//dont change above 
 
 
-enum ledBlink {start, led1, led2, led3, wait, press } blinkState;
+enum ledBlink {start, led1, led1wait, led2, led2wait, led3, led3wait, res } blinkState;
 void Timer_Tick(){
 
     switch (blinkState)
@@ -64,55 +63,57 @@ void Timer_Tick(){
 
     case led1:
        if (~PINA & 01){
-           blinkState = wait;
+           blinkState = led1wait; 
        }
         else{
             blinkState = led2;
         }
-
+        
         break;
 
-    case led2:
+    case led2: 
         if (~PINA & 01){
-           blinkState = wait;
+           blinkState = led2wait; 
        }
        else{
            blinkState = led3;
        }
-
+        
         break;
-
+    
     case led3:
         if (~PINA & 01){
-           blinkState = wait;
+           blinkState = led3wait; 
        }
        else{
            blinkState = led1;
        }
-
+        
+        break; 
+    
+     case led1wait:
+       if (~PINA & 01){
+           blinkState = led1; 
+        }
+        break;  
+    
+    case led2wait:
+       if (~PINA & 01){
+           blinkState = led2; 
+        }
         break;
-    case wait:
-    if (~PINA & 01){
-           blinkState = led1;
-       }
-       else{
-           blinkState = wait;
-       }
 
-     case press:
-    if (~PINA & 01){
-           blinkState = led1;
-       }
-       else{
-           blinkState = wait;
-       }
-
+    case led3wait:
+       if (~PINA & 01){
+           blinkState = led3; 
+        }
+        break;
 
     default:
-        blinkState = start;
+        blinkState = start; 
        break;
     }
-
+    
     switch (blinkState)
     {
 
@@ -120,13 +121,25 @@ void Timer_Tick(){
         PORTB = 0x01;
         break;
 
-    case led2:
+    case led2: 
         PORTB = 0x02;
         break;
-
+    
     case led3:
         PORTB = 0x04;
-        break;
+        break; 
+    
+    case led1wait:
+        PORTB = 0x01;
+        break; 
+    
+     case led2wait:
+        PORTB = 0x02;
+        break; 
+
+     case led3wait:
+        PORTB = 0x04;
+        break; 
 
     default:
         break;
@@ -138,13 +151,13 @@ int main(void){
     DDRB = 0xFF; PORTB = 0x00;
     TimerSet(300);
     TimerOn();
-
+    blinkState = start; 
     while(1){
-        Timer_Tick();
+        Timer_Tick(); 
         while(!TimerFlag);
-            TimerFlag = 0;
+            TimerFlag = 0; 
         }
-        return 1;
+        return 1; 
     }
 
 
